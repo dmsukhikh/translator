@@ -6,8 +6,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_library(sym_table src/SymbolTable.cpp)
 target_include_directories(sym_table PRIVATE include)
 
+add_library(errors src/Errors.cpp)
+target_include_directories(errors PRIVATE include)
+
 add_library(scanner src/Scanner.cpp)
 target_include_directories(scanner PRIVATE include)
+target_link_libraries(scanner PRIVATE errors)
 
 add_executable(translator ${CMAKE_SOURCE_DIR}/src/main.cpp)
 target_include_directories(translator PRIVATE include)

@@ -26,8 +26,18 @@ int main()
     std::cout << std::to_string('4') << std::endl;
     Scanner s;
 
-    for (auto t = s.next(); t.first != TokenType::END; t = s.next())
+    for (;;)
     {
-        std::cout << desc[t.first] << " " << t.second << std::endl;
+        try
+        {
+            for (auto t = s.next(); t.first != TokenType::END; t = s.next())
+            {
+                std::cout << desc[t.first] << " " << t.second << std::endl;
+            }
+        }
+        catch (std::exception &e)
+        {
+            std::cout << e.what() << std::endl;
+        }
     }
 }

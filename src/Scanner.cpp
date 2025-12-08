@@ -1,5 +1,6 @@
 #include "Scanner.hpp"
 #include "Definitions.hpp"
+#include "Errors.hpp"
 #include <cctype>
 
 // TODO: Обработка ошибок
@@ -94,7 +95,7 @@ Token Scanner::next()
         }
     }
 
-    return {};
+    throw LexicalError(ch);
 }
 
 Token Scanner::getCond()
@@ -106,7 +107,12 @@ Token Scanner::getCond()
 
     Lexem l;
     l.push_back(raw_stream.get());
-    l.push_back(raw_stream.get()); // TODO: обработка ошибок
+
+    {
+        auto c = raw_stream.get();
+        if (!raw_stream.eof()) 
+            l.push_back(c);
+    }
 
     if (cond_terms.count(l))
     {
@@ -123,7 +129,7 @@ Token Scanner::getCond()
         return {TokenType::ASSIGN_OP, "="};
     }
 
-    return {}; // TODO: Ошибка
+    throw LexicalError(l);
 }
 
 Token Scanner::getNum()
@@ -136,7 +142,7 @@ Token Scanner::getNum()
     if (!r.eof()) r.unget();
 
     if (l.size() > 1 && l[0] == 0) 
-        ; // TODO: Ошибка 
+        throw LexicalError(l);
 
     return {TokenType::NUM, l};
 }
@@ -164,10 +170,14 @@ Token Scanner::getOp()
 
     Lexem l;
     l.push_back(raw_stream.get());
-    l.push_back(raw_stream.get()); // TODO: обработка ошибок
+    {
+        auto c = raw_stream.get();
+        if (!raw_stream.eof()) 
+            l.push_back(c);
+    }
     
     if (l == "++" || l == "--") return {TokenType::UNARY_OP, l};
-    return {}; // TODO: обработка ошибок
+    throw LexicalError(l);
 }
 
 Token Scanner::getWord()

@@ -3,9 +3,6 @@
 #include "Errors.hpp"
 #include <cctype>
 
-// TODO: Обработка ошибок
-// TODO: Заполнение таблицы символов
-
 Scanner::Scanner()
     : _stream(std::cin)
 {

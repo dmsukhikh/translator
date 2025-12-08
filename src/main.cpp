@@ -1,6 +1,7 @@
 #include <iostream>
 #include "Definitions.hpp"
 #include "Scanner.hpp"
+#include "Parser.hpp"
 
 
 std::unordered_map<TokenType, std::string> desc

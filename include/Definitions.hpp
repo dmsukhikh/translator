@@ -1,9 +1,11 @@
 #pragma once
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 /**
  * Виды токенов, используемых транслятором
@@ -15,7 +17,8 @@
  */
 enum class TokenType
 {
-    NAME=0, //!< Токен названия переменной
+    UNDEF=0, //!< Неопределенное состояние типа токена
+    NAME, //!< Токен названия переменной
     WORD, //!< Токен слова, которое выводится командой print
     NUM, //!< Токен числа
     COMP, //!< Токен операции сравнения
@@ -29,7 +32,6 @@ enum class TokenType
     ASSIGN_OP, //!< Символ "="  +
     END, //!< Конец разбираемого предложения. Для данного вида токена нет
         //!< соответствующей лексемы в языке, используется при анализе
-    UNDEF //!< Неопределенное состояние типа токена
 };
 
 using Lexem = std::string; //!< Тип лексемы
@@ -74,3 +76,12 @@ using SymbolTable = std::unordered_map<Lexem, Symbol>;
  * Таблица символов, используемая частями транслятора
  */
 extern SymbolTable symbolTable;
+
+/**
+ * Простой узел дерева разбора
+ */
+struct ParseNode
+{
+    std::vector<std::unique_ptr<ParseNode>> childs;
+    Token tok {};
+};

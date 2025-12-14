@@ -158,6 +158,8 @@ Token Scanner::getName()
     if (l == "print") return {TokenType::Print, "print"};
     if (l == "for") return {TokenType::For, "for"};
 
+    addSymbol(l);
+
     return {TokenType::NAME, l};
 }
 
@@ -195,3 +197,11 @@ void Scanner::putback(Token t)
         _stream.get().putback(*i);
     }
 }
+
+void Scanner::addSymbol(std::string sym_name)
+{
+    if (symbolTable.count(sym_name) == 0)
+    {
+        symbolTable.insert({sym_name, Symbol{}});
+    }
+};

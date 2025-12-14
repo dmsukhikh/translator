@@ -13,15 +13,15 @@ target_include_directories(errors PRIVATE include)
 
 add_library(scanner src/Scanner.cpp)
 target_include_directories(scanner PRIVATE include)
-target_link_libraries(scanner PRIVATE errors)
+target_link_libraries(scanner PRIVATE errors sym_table)
 
 add_library(parser src/Parser.cpp)
 target_include_directories(parser PRIVATE include)
 target_link_libraries(parser PRIVATE errors)
     
-add_library(interpreter src/Parser.cpp)
+add_library(interpreter src/Interpreter.cpp)
 target_include_directories(interpreter PRIVATE include)
-target_link_libraries(interpreter PRIVATE errors)
+target_link_libraries(interpreter PRIVATE errors sym_table)
 
 add_executable(translator ${CMAKE_SOURCE_DIR}/src/main.cpp)
 target_include_directories(translator PRIVATE include)

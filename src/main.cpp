@@ -1,7 +1,7 @@
 #include <iostream>
 #include "Definitions.hpp"
-#include "Scanner.hpp"
 #include "Parser.hpp"
+#include "Interpreter.hpp"
 
 
 std::unordered_map<TokenType, std::string> desc
@@ -53,7 +53,16 @@ void print_tree(const std::unique_ptr<ParseNode> &p, int depth=0)
 int main()
 {
     Parser parser;
+    Interpreter interpreter;
     auto i = parser.parse();
     std::cout << "done" << std::endl;
-    print_tree(i);
+    i = interpreter.shrink(std::move(i));
+    interpreter.addSymbols(i);
+    
+
+    for (auto &[k, v] : symbolTable)
+    {
+        std::cout << k << " " << v.ind << " " << v.scope << " " << v.init.second
+                  << std::endl;
+    }
 }

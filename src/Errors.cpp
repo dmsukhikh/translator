@@ -21,3 +21,10 @@ const char* SyntaxError::what() const noexcept
 {
     return _info.c_str();
 }
+
+SemanticError::SemanticError(std::string_view what) : _info(what) {}
+
+const char* SemanticError::what() const noexcept
+{
+    return _info.c_str();
+}

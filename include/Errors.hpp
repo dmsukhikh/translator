@@ -53,3 +53,17 @@ public:
     const char* what() const noexcept override;
     virtual ~SyntaxError() = default;
 };
+
+/**
+ * Заготовка для семантической ошибки 
+ */
+class SemanticError : public std::exception
+{
+
+    std::string _info;
+public:
+    SemanticError(std::string_view what);
+
+    const char* what() const noexcept override;
+    virtual ~SemanticError() = default;
+};

@@ -5,6 +5,7 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 /**
@@ -32,6 +33,20 @@ enum class TokenType
     ASSIGN_OP, //!< Символ "="  +
     END, //!< Конец разбираемого предложения. Для данного вида токена нет
         //!< соответствующей лексемы в языке, используется при анализе
+};
+
+/**
+ * Виды нетерминалов
+ */
+enum class NonTerm
+{
+    STAT,
+    FOR_EXPR,
+    INIT,
+    COND,
+    OPERAND,
+    ACTION_STR,
+    CMD
 };
 
 using Lexem = std::string; //!< Тип лексемы
@@ -83,5 +98,5 @@ extern SymbolTable symbolTable;
 struct ParseNode
 {
     std::vector<std::unique_ptr<ParseNode>> childs;
-    Token tok {};
+    std::variant<NonTerm, Token> tok {};
 };

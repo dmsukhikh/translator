@@ -14,3 +14,10 @@ const char* LexicalError::what() const noexcept
 {
     return _info.c_str();
 }
+
+SyntaxError::SyntaxError(std::string_view what) : _info(what) {}
+
+const char* SyntaxError::what() const noexcept
+{
+    return _info.c_str();
+}

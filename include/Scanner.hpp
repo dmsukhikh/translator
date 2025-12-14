@@ -35,6 +35,13 @@ public:
      */
     Token next();
 
+    /**
+     * Положить токен обратно
+     *
+     * \note Не обязательно, чтобы токен был считан ранее
+     */
+    void putback(Token t);
+
 private:
     using First
         = std::unordered_set<char>; //!< Тип множества FIRST (почти, вместо

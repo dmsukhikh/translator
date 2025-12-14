@@ -39,3 +39,17 @@ public:
     const char* what() const noexcept override;
     virtual ~LexicalError() = default;
 };
+
+/**
+ * Заготовка для ошибки синтаксического разбора
+ */
+class SyntaxError : public std::exception
+{
+
+    std::string _info;
+public:
+    SyntaxError(std::string_view what);
+
+    const char* what() const noexcept override;
+    virtual ~SyntaxError() = default;
+};

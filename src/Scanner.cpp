@@ -29,11 +29,6 @@ Token Scanner::next()
     auto ch = raw_stream.get();
 
 
-    if (raw_stream.eof())
-    {
-        return {TokenType::END, ""};
-    }
-
     if (is_quoted)
     {
         if (ch == '"')
@@ -65,6 +60,11 @@ Token Scanner::next()
         else if (ch == ';')
         {
             return { TokenType::SEMICOL, ";" };
+        }
+
+        else if (ch == '$')
+        {
+            return { TokenType::END, "$" };
         }
 
         else if (ch == '+' || ch == '-')
@@ -186,4 +186,12 @@ Token Scanner::getWord()
 
     if (!r.eof()) r.unget();
     return {TokenType::WORD, l}; 
+}
+
+void Scanner::putback(Token t)
+{
+    for (auto i = t.second.rbegin(); i != t.second.rend(); ++i)
+    {
+        _stream.get().putback(*i);
+    }
 }

@@ -17,9 +17,14 @@ target_include_directories(scanner PRIVATE include)
 target_link_libraries(scanner PRIVATE errors)
 target_compile_definitions(scanner PRIVATE cxx_std_17)
 
+add_library(parser src/Parser.cpp)
+target_include_directories(parser PRIVATE include)
+target_link_libraries(parser PRIVATE errors)
+target_compile_definitions(parser PRIVATE cxx_std_17)
+
 add_executable(translator ${CMAKE_SOURCE_DIR}/src/main.cpp)
 target_include_directories(translator PRIVATE include)
-target_link_libraries(translator sym_table scanner)
+target_link_libraries(translator sym_table scanner parser)
 target_compile_definitions(translator PRIVATE cxx_std_17)
 
 

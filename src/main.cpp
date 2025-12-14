@@ -18,27 +18,42 @@ std::unordered_map<TokenType, std::string> desc
     {TokenType::RPAR, "RPAR"},
     {TokenType::SEMICOL, "SEMICOL"},
     {TokenType::UNARY_OP, "UNARY_OP"},
-    {TokenType::UNDEF, "UNDEF"},
     {TokenType::WORD, "WORD"}
 };
 
-int main()
+std::unordered_map<NonTerm, std::string> nt_desc 
 {
-    std::cout << std::to_string('4') << std::endl;
-    Scanner s;
+    {NonTerm::ACTION_STR, "action-str"},
+    {NonTerm::CMD, "cmd"},
+    {NonTerm::COND, "cond"},
+    {NonTerm::FOR_EXPR, "for"},
+    {NonTerm::INIT, "init"},
+    {NonTerm::OPERAND, "operand"},
+    {NonTerm::STAT, "stat"},
+};
 
-    for (;;)
+void print_tree(const std::unique_ptr<ParseNode> &p, int depth=0)
+{
+    auto align = std::string(depth, ' ');
+    if (p->tok.index() == 0)  // NonTerm 
     {
-        try
+        std::cout << align << nt_desc[std::get<0>(p->tok)] << std::endl;
+        for (const auto &i: p->childs)
         {
-            for (auto t = s.next(); t.first != TokenType::END; t = s.next())
-            {
-                std::cout << desc[t.first] << " " << t.second << std::endl;
-            }
-        }
-        catch (std::exception &e)
-        {
-            std::cout << e.what() << std::endl;
+            print_tree(i, depth+4);
         }
     }
+    else  // Term
+    {
+        const auto& token = std::get<1>(p->tok);
+        std::cout << align << desc[token.first] << " " << token.second << std::endl;
+    }
+}
+
+int main()
+{
+    Parser parser;
+    auto i = parser.parse();
+    std::cout << "done" << std::endl;
+    print_tree(i);
 }

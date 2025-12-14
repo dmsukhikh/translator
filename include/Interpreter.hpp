@@ -1,5 +1,6 @@
 #include "Errors.hpp"
 #include "Definitions.hpp"
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -17,6 +18,12 @@ class Interpreter
      * Слово, которое надо выводить
      */
     std::string _word;
+
+    void _execRoutine(const std::unique_ptr<ParseNode> &i);
+
+    static std::unordered_map<std::string,
+        std::function<bool(uint64_t, uint64_t)>>
+        comp;
 
 public:
     /**
@@ -42,8 +49,8 @@ public:
      *
      * <cmd> срезается до одного слова WORD, которое необходимо вывести
      */
-    std::unique_ptr<ParseNode> shrink(std::unique_ptr<ParseNode> tree);
-
+    std::unique_ptr<ParseNode>
+    shrink(std::unique_ptr<ParseNode> tree);
 
     void addSymbols(const std::unique_ptr<ParseNode> &tree);
 
@@ -54,4 +61,6 @@ public:
      * Interpreter::shrink
      */
     void execute(const std::unique_ptr<ParseNode>& ast);
+
+    void validate(const std::unique_ptr<ParseNode>& ast);
 };

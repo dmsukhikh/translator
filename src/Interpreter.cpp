@@ -1,7 +1,40 @@
 #include "Interpreter.hpp"
 #include "Definitions.hpp"
+#include "Errors.hpp"
 #include <algorithm>
+#include <memory>
 #include <stdexcept>
+#include <iostream>
+
+std::unordered_map<std::string, std::function<bool(uint64_t, uint64_t)>>
+    Interpreter::comp {
+        { ">", [](auto a, auto b) { return a > b; } },
+        { "<", [](auto a, auto b) { return a < b; } },
+        { ">=", [](auto a, auto b) { return a >= b; } },
+        { "<=", [](auto a, auto b) { return a <= b; } },
+        { "==", [](auto a, auto b) { return a == b; } },
+        { "!=", [](auto a, auto b) { return a != b; } },
+        { "&&", [](auto a, auto b) { return a && b; } },
+        { "||", [](auto a, auto b) { return a || b; } },
+        { "", [](auto a, auto b) { return true; } },
+    };
+
+void checks(Token t, size_t scope)
+{
+    if (t.first == TokenType::NAME)
+    {
+        if (symbolTable.count(t.second) == 0) // Неинициализированная переменная
+        {
+            throw SemanticError(t.second + std::string(" is uninitialized"));
+        }
+
+        if (symbolTable[t.second].scope > scope)
+        {
+            throw SemanticError(
+                t.second + std::string(" is used out of its scope"));
+        }
+    }
+}
 
 template<typename T>
 void erase_idx(std::vector<T> &arr, std::size_t s)
@@ -37,8 +70,15 @@ std::unique_ptr<ParseNode> Interpreter::shrink(std::unique_ptr<ParseNode> tree)
             throw std::runtime_error("bad usage of get_name_from_cmd");
         }
 
-        auto out = std::move(cmd->childs[3]);
-        cmd->childs.clear();
+        if (cmd->childs.size() > 0)
+        {
+            auto out = std::move(cmd->childs[3]);
+            cmd->childs.clear();
+            return out;
+        }
+
+        auto out = std::make_unique<ParseNode>();
+        out->tok = Token{TokenType::WORD, ""};
         return out;
     };
 
@@ -68,6 +108,11 @@ void Interpreter::addSymbols(const std::unique_ptr<ParseNode> &tree)
     {
         auto a = std::get<Token>(init->childs[0]->tok);
         auto b = std::get<Token>(init->childs[1]->tok);
+
+        if (symbolTable[a.second].ind != -1)
+        {
+            throw SemanticError(a.second + " is initialized twice");
+        }
         symbolTable[a.second].ind = ind++;
         symbolTable[a.second].scope = scope++;
         symbolTable[a.second].init = b;
@@ -84,8 +129,118 @@ void Interpreter::addSymbols(const std::unique_ptr<ParseNode> &tree)
     }
 }
 
+void Interpreter::validate(const std::unique_ptr<ParseNode>& i)
+{
+    const auto& init = i->childs[0]->childs[0];
+    auto l = std::get<Token>(init->childs[0]->tok);
+    auto r = std::get<Token>(init->childs[1]->tok);
+    const auto cur_scope = symbolTable[l.second].scope;
+    checks(l, cur_scope);
+
+    // comparing
+    const auto& comp_part = i->childs[0]->childs[1];
+    Token a, cmp, b;
+    if (comp_part->childs.size() > 0)
+    {
+        a = std::get<Token>(comp_part->childs[0]->childs[0]->tok);
+        cmp = std::get<Token>(comp_part->childs[1]->tok);
+        b = std::get<Token>(comp_part->childs[2]->childs[0]->tok);
+        checks(a, cur_scope);
+        checks(b, cur_scope);
+    }
+
+    // action
+    const auto& act = i->childs[0]->childs[2];
+    if (act->childs.size() > 0)
+    {
+        auto name = std::get<Token>(act->childs[0]->tok);
+        auto action = std::get<Token>(act->childs[1]->tok);
+
+        if (name.first == TokenType::UNARY_OP)
+            swap(name, action);
+        checks(name, cur_scope);
+    }
+    if (i->childs[1]->tok.index() == 0) // == STAT
+    {
+        validate(i->childs[1]);
+    }
+}
+
 void Interpreter::execute(const std::unique_ptr<ParseNode>& ast)
 {
-    // Заполняем таблицу символов
-       
+    validate(ast);
+    _execRoutine(ast);
 }
+
+void Interpreter::_execRoutine(const std::unique_ptr<ParseNode> &i)
+{
+    // TODO: remove checks from runtime
+    // initialization
+    const auto &init = i->childs[0]->childs[0];
+    auto l = std::get<Token>(init->childs[0]->tok);
+    auto r = std::get<Token>(init->childs[1]->tok);
+    const auto cur_scope = symbolTable[l.second].scope;
+    
+    if (r.first == TokenType::NUM)
+    {
+        _memory[symbolTable[l.second].ind] = std::stoi(r.second);
+    }
+    else
+    {
+        _memory[symbolTable[l.second].ind] = _memory[symbolTable[r.second].ind];
+    }
+
+    // comparing
+    const auto &comp_part = i->childs[0]->childs[1]; 
+    Token a, cmp, b;
+    if (comp_part->childs.size() > 0)
+    {
+        a = std::get<Token>(comp_part->childs[0]->childs[0]->tok);
+        cmp = std::get<Token>(comp_part->childs[1]->tok);
+        b = std::get<Token>(comp_part->childs[2]->childs[0]->tok);
+    }
+
+    int aa = a.first == TokenType::NUM ? std::stoi(a.second)
+                                       : _memory[symbolTable[a.second].ind];
+    int bb = b.first == TokenType::NUM ? std::stoi(b.second)
+                                       : _memory[symbolTable[b.second].ind];
+
+    for (; comp[cmp.second](aa, bb);)
+    {
+        if (i->childs[1]->tok.index() == 0) // == STAT
+        {
+            _execRoutine(i->childs[1]);
+        }
+        else
+        {
+            if (_word != "")
+                std::cout << _word << std::endl;
+        }
+
+        // action
+        const auto &act = i->childs[0]->childs[2];
+        if (act->childs.size() > 0)
+        {
+            auto name = std::get<Token>(act->childs[0]->tok);
+            auto action  = std::get<Token>(act->childs[1]->tok);
+
+            if (name.first == TokenType::UNARY_OP)
+                swap(name, action);
+
+            if (action.second == "++")
+            {
+                _memory[symbolTable[name.second].ind]++;
+            }
+            else
+            {
+                _memory[symbolTable[name.second].ind]--;
+            }
+        }
+
+        aa = a.first == TokenType::NUM ? std::stoi(a.second)
+                                           : _memory[symbolTable[a.second].ind];
+        bb = b.first == TokenType::NUM ? std::stoi(b.second)
+                                           : _memory[symbolTable[b.second].ind];
+    }
+}
+

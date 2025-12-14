@@ -141,6 +141,12 @@ std::unique_ptr<ParseNode> Parser::parse()
             // мы вытаскиваем элементы из стека в обратном порядке
             std::reverse(to_push->childs.begin(), to_push->childs.end());
 
+            if (std::abs(action) == 4 || std::abs(action) == 5) // инициализация
+            {
+                symbolTable[std::get<Token>(to_push->childs[0]->tok).second]
+                    = Symbol { -1, {}, -1 };
+            }
+
             auto new_state = _goto[_stack.top().first][idx(production.first)];
 
             _stack.push( {new_state, std::move(to_push)} );

@@ -58,11 +58,5 @@ int main()
     std::cout << "done" << std::endl;
     i = interpreter.shrink(std::move(i));
     interpreter.addSymbols(i);
-    
-
-    for (auto &[k, v] : symbolTable)
-    {
-        std::cout << k << " " << v.ind << " " << v.scope << " " << v.init.second
-                  << std::endl;
-    }
+    interpreter.execute(i); 
 }

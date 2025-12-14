@@ -81,14 +81,6 @@ private:
      */
     Token getWord();
 
-    /**
-     * Добавить запись в таблицу символов
-     *
-     * \param sym_name Имя символа
-     * \note В данном языке символом выступают только переменные
-     */
-    void addSymbol(std::string sym_name);
-
     std::reference_wrapper<std::istream>
         _stream; //!< Входной поток, откуда читаются символы программы
 };

@@ -50,12 +50,22 @@ void print_tree(const std::unique_ptr<ParseNode> &p, int depth=0)
     }
 }
 
-int main()
+int main(int argc, char **argv)
 {
+    if (argc > 2)
+    {
+        if (std::string(argv[1]) == "--help")
+        {
+            std::cout << "tranlator - простой транслятор for-выражений" << std::endl;
+            std::cout << "При вызове без аргументов читает стандартный вывод" << std::endl;
+            std::cout << "При вызове с аргументом, транслятор читает код из файла" << std::endl;
+
+        }
+    }
+
     Parser parser;
     Interpreter interpreter;
     auto i = parser.parse();
-    std::cout << "done" << std::endl;
     i = interpreter.shrink(std::move(i));
     interpreter.addSymbols(i);
     interpreter.execute(i); 

@@ -20,6 +20,8 @@ class Interpreter
      */
     std::string _word;
 
+    int _scope{0}, _ind{0}, cur_scope{0};
+
     void _execRoutine(const std::unique_ptr<ParseNode> &i);
 
     static std::unordered_map<std::string,

@@ -108,9 +108,6 @@ std::unique_ptr<ParseNode> Interpreter::shrink(std::unique_ptr<ParseNode> tree)
 
 void Interpreter::addSymbols(const std::unique_ptr<ParseNode> &tree) 
 {
-    static int scope = 0; 
-    static int ind = 0;
-
     // stat -> for -> init
     const auto& init = tree->childs[0]->childs[0];
 
@@ -123,15 +120,15 @@ void Interpreter::addSymbols(const std::unique_ptr<ParseNode> &tree)
         {
             throw SemanticError(a.second + " is initialized twice");
         }
-        symbolTable[a.second].ind = ind++;
-        symbolTable[a.second].scope = scope;
+        symbolTable[a.second].ind = _ind++;
+        symbolTable[a.second].scope = _scope;
         symbolTable[a.second].init = b;
         _memory.push_back(0);
     }
 
     if (tree->childs[1]->tok.index() == 0) // i. e. == NonTerm::STAT
     {
-        scope++;
+        _scope++;
         addSymbols(tree->childs[1]);
     }
     else // == NonTerm::CMD
@@ -142,7 +139,6 @@ void Interpreter::addSymbols(const std::unique_ptr<ParseNode> &tree)
 
 void Interpreter::validate(const std::unique_ptr<ParseNode>& i)
 {
-    static int cur_scope = 0;
     const auto& init = i->childs[0]->childs[0];
     if (init->childs.size() > 0)
     {

@@ -83,14 +83,14 @@ int main(int argc, char **argv)
         }
         scanner = Scanner(s);
     }
-    Parser parser(scanner);
-    Interpreter interpreter;
-    auto i = parser.parse();
-    i = interpreter.shrink(std::move(i));
-    interpreter.addSymbols(i);
     try
     {
-        interpreter.execute(i); 
+        Parser parser(scanner);
+        Interpreter interpreter;
+        auto i = parser.parse();
+        i = interpreter.shrink(std::move(i));
+        interpreter.addSymbols(i);
+        interpreter.execute(i);
     }
     catch (std::exception &e)
     {

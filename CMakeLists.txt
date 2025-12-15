@@ -4,6 +4,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project("translator")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(TESTS ON)
+
 
 add_library(sym_table src/SymbolTable.cpp)
 target_include_directories(sym_table PRIVATE include)
@@ -26,6 +28,12 @@ target_link_libraries(interpreter PRIVATE errors sym_table)
 add_executable(translator ${CMAKE_SOURCE_DIR}/src/main.cpp)
 target_include_directories(translator PRIVATE include)
 target_link_libraries(translator sym_table scanner parser interpreter)
+
+if (TESTS)
+    add_executable(tests src/tests.cpp)
+    target_include_directories(tests PRIVATE include)
+    target_link_libraries(tests sym_table scanner parser interpreter)
+endif()
 
 target_compile_options(scanner PUBLIC -g)
 

@@ -116,7 +116,7 @@ std::unique_ptr<ParseNode> Parser::parse()
         auto action = _action[state_idx][tok_idx];
         if (action == 0)  // Error
         {
-            throw SyntaxError("stub"); // TODO: pretty err msg
+            throw SyntaxError("Error in syntax"); 
         }
 
         else if (action > 0)  // Shift

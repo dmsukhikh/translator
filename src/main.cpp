@@ -2,6 +2,8 @@
 #include "Definitions.hpp"
 #include "Parser.hpp"
 #include "Interpreter.hpp"
+#include <fstream>
+#include <iostream>
 
 
 std::unordered_map<TokenType, std::string> desc
@@ -52,21 +54,48 @@ void print_tree(const std::unique_ptr<ParseNode> &p, int depth=0)
 
 int main(int argc, char **argv)
 {
-    if (argc > 2)
+    if (argc == 2)
     {
         if (std::string(argv[1]) == "--help")
         {
             std::cout << "tranlator - простой транслятор for-выражений" << std::endl;
-            std::cout << "При вызове без аргументов читает стандартный вывод" << std::endl;
-            std::cout << "При вызове с аргументом, транслятор читает код из файла" << std::endl;
-
+            std::cout << "При вызове без аргументов читает стандартный вывод, "
+                         "пока не будет нажато Ctrl+D"
+                      << std::endl;
+            std::cout
+                << "При вызове с аргументом, транслятор читает код из файла"
+                << std::endl;
+            return 0;
         }
     }
 
-    Parser parser;
+    // Можно сделать конструктор Scanner и для rvalue
+    std::fstream s;
+    Scanner scanner;
+    if (argc == 2)
+    {
+        s.open(argv[1], std::ios_base::in);
+        if (!s.is_open())
+        {
+            std::cerr << "Ошибка при чтении файла " + std::string(argv[1])
+                      << std::endl;
+            return 1;
+        }
+        scanner = Scanner(s);
+    }
+    Parser parser(scanner);
     Interpreter interpreter;
     auto i = parser.parse();
     i = interpreter.shrink(std::move(i));
     interpreter.addSymbols(i);
-    interpreter.execute(i); 
+    try
+    {
+        interpreter.execute(i); 
+    }
+    catch (std::exception &e)
+    {
+        std::cerr << "Ошибка при анализе программы: " << std::endl;
+        std::cerr << "Сообщение ошибки: " << e.what() << std::endl;
+        return 1;
+    }
 }

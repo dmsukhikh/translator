@@ -3,7 +3,6 @@
 #include "Scanner.hpp"
 #include "Parser.hpp"
 #include "Interpreter.hpp"
-#include <algorithm>
 #include <exception>
 #include <sstream>
 #include <vector>

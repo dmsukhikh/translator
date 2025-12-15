@@ -2,7 +2,9 @@
 SLR-анализатор простых for-выражений, написанный на C++
 ## Whois
 Студент: **Сухих Дмитрий**
+
 Группа: **КМБО-05-23**
+
 Вариант: **13**
 ## Описание языка
 __Подробное описание языка вы можете посмотреть в файле trans.md__
@@ -15,13 +17,13 @@ __Подробное описание языка вы можете посмот�
 * UNARY_OP_TOKEN - ++ | --
 
 Грамматика:
-_\<stat>_ ::= _\<for-expr>_ _\<stat>_ | _\<for-expr>_ _\<cmd>_;
-_\<for-expr>_ ::= for(_\<init>_;_\<cond>_;_\<action-str>_)
-_\<init>_ ::= NAME_TOKEN=NUM_TOKEN | NAME_TOKEN=NAME_TOKEN | ε
-_\<cond>_ ::= _\<operand>_ COMP_TOKEN _\<operand>_| ε
-_\<operand>_ ::= NAME_TOKEN | NUM_TOKEN
-_\<action-str>_ ::=  UNARY_OP_TOKEN NAME_TOKEN | NAME_TOKEN UNARY_OP_TOKEN | ε
-_\<cmd>_ ::= print(" WORD_TOKEN ") | ε
+* _\<stat>_ ::= _\<for-expr>_ _\<stat>_ | _\<for-expr>_ _\<cmd>_;
+* _\<for-expr>_ ::= for(_\<init>_;_\<cond>_;_\<action-str>_)
+* _\<init>_ ::= NAME_TOKEN=NUM_TOKEN | NAME_TOKEN=NAME_TOKEN | ε
+* _\<cond>_ ::= _\<operand>_ COMP_TOKEN _\<operand>_| ε
+* _\<operand>_ ::= NAME_TOKEN | NUM_TOKEN
+* _\<action-str>_ ::=  UNARY_OP_TOKEN NAME_TOKEN | NAME_TOKEN UNARY_OP_TOKEN | ε
+* _\<cmd>_ ::= print(" WORD_TOKEN ") | ε
 
 ## Требования
 - Компилятор C++, поддерживающий стандарт C++17

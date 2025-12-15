@@ -1,6 +1,7 @@
 #include "Errors.hpp"
 #include "Definitions.hpp"
 #include <functional>
+#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -24,6 +25,8 @@ class Interpreter
     static std::unordered_map<std::string,
         std::function<bool(uint64_t, uint64_t)>>
         comp;
+
+    std::reference_wrapper<std::ostream> _stream;
 
 public:
     /**
@@ -51,6 +54,9 @@ public:
      */
     std::unique_ptr<ParseNode>
     shrink(std::unique_ptr<ParseNode> tree);
+
+    Interpreter();
+    Interpreter(std::ostream &stream);
 
     void addSymbols(const std::unique_ptr<ParseNode> &tree);
 

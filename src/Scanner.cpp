@@ -28,6 +28,10 @@ Token Scanner::next()
 
     auto ch = raw_stream.get();
 
+    if (raw_stream.eof() || raw_stream.fail() )
+    {
+        return { TokenType::END, "$" };
+    }
 
     if (is_quoted)
     {
@@ -60,11 +64,6 @@ Token Scanner::next()
         else if (ch == ';')
         {
             return { TokenType::SEMICOL, ";" };
-        }
-
-        else if (ch == '$')
-        {
-            return { TokenType::END, "$" };
         }
 
         else if (ch == '+' || ch == '-')

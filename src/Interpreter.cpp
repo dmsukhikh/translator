@@ -6,6 +6,16 @@
 #include <stdexcept>
 #include <iostream>
 
+Interpreter::Interpreter()
+    : _stream(std::cout)
+{
+}
+
+Interpreter::Interpreter(std::ostream& stream)
+    : _stream(stream)
+{
+}
+
 std::unordered_map<std::string, std::function<bool(uint64_t, uint64_t)>>
     Interpreter::comp {
         { ">", [](auto a, auto b) { return a > b; } },
@@ -114,13 +124,14 @@ void Interpreter::addSymbols(const std::unique_ptr<ParseNode> &tree)
             throw SemanticError(a.second + " is initialized twice");
         }
         symbolTable[a.second].ind = ind++;
-        symbolTable[a.second].scope = scope++;
+        symbolTable[a.second].scope = scope;
         symbolTable[a.second].init = b;
         _memory.push_back(0);
     }
 
     if (tree->childs[1]->tok.index() == 0) // i. e. == NonTerm::STAT
     {
+        scope++;
         addSymbols(tree->childs[1]);
     }
     else // == NonTerm::CMD
@@ -131,11 +142,14 @@ void Interpreter::addSymbols(const std::unique_ptr<ParseNode> &tree)
 
 void Interpreter::validate(const std::unique_ptr<ParseNode>& i)
 {
+    static int cur_scope = 0;
     const auto& init = i->childs[0]->childs[0];
-    auto l = std::get<Token>(init->childs[0]->tok);
-    auto r = std::get<Token>(init->childs[1]->tok);
-    const auto cur_scope = symbolTable[l.second].scope;
-    checks(l, cur_scope);
+    if (init->childs.size() > 0)
+    {
+        auto l = std::get<Token>(init->childs[0]->tok);
+        auto r = std::get<Token>(init->childs[1]->tok);
+        checks(l, cur_scope);
+    }
 
     // comparing
     const auto& comp_part = i->childs[0]->childs[1];
@@ -160,8 +174,10 @@ void Interpreter::validate(const std::unique_ptr<ParseNode>& i)
             swap(name, action);
         checks(name, cur_scope);
     }
-    if (i->childs[1]->tok.index() == 0) // == STAT
+    if (i->childs[1]->tok.index() == 0
+        && std::get<NonTerm>(i->childs[1]->tok) == NonTerm::STAT) // == STAT
     {
+        cur_scope++;
         validate(i->childs[1]);
     }
 }
@@ -174,47 +190,49 @@ void Interpreter::execute(const std::unique_ptr<ParseNode>& ast)
 
 void Interpreter::_execRoutine(const std::unique_ptr<ParseNode> &i)
 {
-    // TODO: remove checks from runtime
-    // initialization
     const auto &init = i->childs[0]->childs[0];
-    auto l = std::get<Token>(init->childs[0]->tok);
-    auto r = std::get<Token>(init->childs[1]->tok);
-    const auto cur_scope = symbolTable[l.second].scope;
-    
-    if (r.first == TokenType::NUM)
+    static int cur_scope = 0;
+    if (init->childs.size() > 0)
     {
-        _memory[symbolTable[l.second].ind] = std::stoi(r.second);
-    }
-    else
-    {
-        _memory[symbolTable[l.second].ind] = _memory[symbolTable[r.second].ind];
+        auto l = std::get<Token>(init->childs[0]->tok);
+        auto r = std::get<Token>(init->childs[1]->tok);
+        if (r.first == TokenType::NUM)
+        {
+            _memory[symbolTable[l.second].ind] = std::stoi(r.second);
+        }
+        else
+        {
+            _memory[symbolTable[l.second].ind]
+                = _memory[symbolTable[r.second].ind];
+        }
     }
 
     // comparing
     const auto &comp_part = i->childs[0]->childs[1]; 
     Token a, cmp, b;
+    int aa = 0, bb = 0;
     if (comp_part->childs.size() > 0)
     {
         a = std::get<Token>(comp_part->childs[0]->childs[0]->tok);
         cmp = std::get<Token>(comp_part->childs[1]->tok);
         b = std::get<Token>(comp_part->childs[2]->childs[0]->tok);
-    }
-
-    int aa = a.first == TokenType::NUM ? std::stoi(a.second)
+        aa = a.first == TokenType::NUM ? std::stoi(a.second)
                                        : _memory[symbolTable[a.second].ind];
-    int bb = b.first == TokenType::NUM ? std::stoi(b.second)
+        bb = b.first == TokenType::NUM ? std::stoi(b.second)
                                        : _memory[symbolTable[b.second].ind];
+    }
 
     for (; comp[cmp.second](aa, bb);)
     {
-        if (i->childs[1]->tok.index() == 0) // == STAT
+        if (i->childs[1]->tok.index() == 0
+            && std::get<NonTerm>(i->childs[1]->tok) == NonTerm::STAT)
         {
             _execRoutine(i->childs[1]);
         }
         else
         {
             if (_word != "")
-                std::cout << _word << std::endl;
+                _stream.get() << _word << std::endl;
         }
 
         // action
@@ -237,10 +255,13 @@ void Interpreter::_execRoutine(const std::unique_ptr<ParseNode> &i)
             }
         }
 
-        aa = a.first == TokenType::NUM ? std::stoi(a.second)
+        if (comp_part->childs.size() > 0)
+        {
+            aa = a.first == TokenType::NUM ? std::stoi(a.second)
                                            : _memory[symbolTable[a.second].ind];
-        bb = b.first == TokenType::NUM ? std::stoi(b.second)
+            bb = b.first == TokenType::NUM ? std::stoi(b.second)
                                            : _memory[symbolTable[b.second].ind];
+        }
     }
 }
 

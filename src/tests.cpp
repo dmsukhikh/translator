@@ -376,10 +376,4 @@ int main()
     }
     std::cout << "done: " << cnt-1 << " tests, ok: " << ok << " tests"
               << std::endl;
-
-    std::cout <<"bob" << std::endl;
-    std::cout <<"bob" << std::endl;
-    std::cout <<"bob" << std::endl;
-    std::cout <<"bob" << std::endl;
-    std::cout <<"bob" << std::endl;
 }

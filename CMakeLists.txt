@@ -4,8 +4,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project("translator")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-option(TESTS ON)
-
+option(TESTS "Enable tests" ON)
 
 add_library(sym_table src/SymbolTable.cpp)
 target_include_directories(sym_table PRIVATE include)
